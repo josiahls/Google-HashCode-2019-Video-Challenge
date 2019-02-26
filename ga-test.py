@@ -15,24 +15,11 @@ THRESHFITNESS = MAXFITNESS # for benchmarking only
 
 geneset = string.printable
 
-
-# hyperparameters
-NUMSPLITS = 4
-NUMCHILDREN = 2
-NUMPARENTS = 3
-
-POPSIZE = 400
-MINMUTATIONS = 1
-MAXMUTATIONS = 1
-NEWPARENTSPERGEN = int(0.2 * POPSIZE)
-PARENTSKEPT = int(0.2 * POPSIZE)
-
 MAXGENERATIONS = 100
-
-MUTCHANCE = 0.2
-
 TESTSPERSETUP = 2 # 10
 TESTLOSSEXPONENT = 2.0
+
+
 
 
 def fitness(x):
@@ -98,59 +85,88 @@ def select_children(children):
     return children[:int(POPSIZE * 0.8)] + children[int(POPSIZE * 0.5): int(POPSIZE * 0.5) + POPSIZE-int(POPSIZE * 0.8)]
     
 
+def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, NEWPARENTSPERGENRATE, PARENTSKEPTRATE, MUTCHANCE):
+    totaltime = 0
+    numconverged = 0
 
-totaltime = 0
-numconverged = 0
+    print("Testing parameters...")
+    for f in range(TESTSPERSETUP):
+        starttime = time.time()
 
-print("Testing parameters...")
-for f in range(TESTSPERSETUP):
-    starttime = time.time()
+        
+        parents = [genParent() for i in range(100)]
+        #print(parents)
+
+
+        for g in range(MAXGENERATIONS):
+
+            children = []
+            #children = [breed([random.choice(parents) for _ in range(NUMPARENTS)]) for d in range(2 * POPSIZE)]
+            for d in range(2 * POPSIZE):
+                children += breed([random.choice(parents) for _ in range(NUMPARENTS)])
+
+            children += parents[:PARENTSKEPT]
+            children += [genParent() for i in range(NEWPARENTSPERGEN)]
+            children = sorted(children, key=lambda child: fitness(child), reverse=True)
+
+            # we should keep the ones that are more different, but for now, just pull from top 80% and bottom 20%
+            children = select_children(children)
+
+            maxfitness = fitness(children[0])
+            
+            print("Gen "+str(g)+" max fitness "+str(maxfitness)+" with "+children[0])
+            parents = children
+
+            if fitness(children[0]) >= THRESHFITNESS:
+                numconverged += 1
+                print("Finish gen "+str(g)+" max fitness "+str(maxfitness)+" with "+children[0])
+                break
+
+        else:
+            numconverged += 0
+
+        # print(parents)
+
+        endtime = time.time()
+
+        elapsedtime = endtime - starttime
+        totaltime += elapsedtime
+
+    convergedrate = numconverged / TESTSPERSETUP
+    avgtime = totaltime / TESTSPERSETUP
+
+
+    strength = avgtime * (TESTSPERSETUP**TESTLOSSEXPONENT)
+
+    print(strength)
+    return strength
+
+
+if __name__=='__main__':
+
+
+    # hyperparameters
+    NUMSPLITS = 4
+    NUMCHILDREN = 2
+    NUMPARENTS = 3
+
+    POPSIZE = 400
+    MINMUTATIONS = 1
+    MAXMUTATIONS = 1
+    NEWPARENTSPERGENRATE = 0.2
+
+    PARENTSKEPTRATE = 0.2
+
+    NEWPARENTSPERGEN = int(NEWPARENTSPERGENRATE * POPSIZE)
+    PARENTSKEPT = int(PARENTSKEPTRATE * POPSIZE)
 
     
-    parents = [genParent() for i in range(100)]
-    #print(parents)
+
+    MUTCHANCE = 0.2
+
+    print(ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, NEWPARENTSPERGENRATE, PARENTSKEPTRATE, MUTCHANCE))
 
 
-    for g in range(MAXGENERATIONS):
-
-        children = []
-        #children = [breed([random.choice(parents) for _ in range(NUMPARENTS)]) for d in range(2 * POPSIZE)]
-        for d in range(2 * POPSIZE):
-            children += breed([random.choice(parents) for _ in range(NUMPARENTS)])
-
-        children += parents[:PARENTSKEPT]
-        children += [genParent() for i in range(NEWPARENTSPERGEN)]
-        children = sorted(children, key=lambda child: fitness(child), reverse=True)
-
-        # we should keep the ones that are more different, but for now, just pull from top 80% and bottom 20%
-        children = select_children(children)
-
-        maxfitness = fitness(children[0])
-        
-        print("Gen "+str(g)+" max fitness "+str(maxfitness)+" with "+children[0])
-        parents = children
-
-        if fitness(children[0]) >= THRESHFITNESS:
-            numconverged += 1
-            print("Finish gen "+str(g)+" max fitness "+str(maxfitness)+" with "+children[0])
-            break
-
-    else:
-        numconverged += 0
-
-    # print(parents)
-
-    endtime = time.time()
-
-    elapsedtime = endtime - starttime
-    totaltime += elapsedtime
-
-convergedrate = numconverged / TESTSPERSETUP
-avgtime = totaltime / TESTSPERSETUP
-
-
-strength = avgtime * (TESTSPERSETUP**TESTLOSSEXPONENT)
-
-print(strength)
-                                     
+    
+                                         
 
