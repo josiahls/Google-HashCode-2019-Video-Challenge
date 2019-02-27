@@ -1,44 +1,104 @@
 import string
 import random
 import time
+import math
 random.seed(1)
 
-#N = 1000
-#M = 1000
-
-target = "Hello world!"
-N = len(target)
-
-MAXFITNESS = len(target)
-THRESHFITNESS = MAXFITNESS # for benchmarking only
+#MAXFITNESS = len(target)
+THRESHFITNESS = 10**100 #MAXFITNESS # for benchmarking only
 
 
-geneset = string.printable
+# read input
+V, E, R, C, X = list(map(int, input().strip().split()))
+VSIZES = list(map(int, input().strip().split()))
+assert len(VSIZES) == V
+ECACHETIMES = [dict() for i in range(E)]
+DCLATENCIES = []
+
+for i in range(E):
+    latency, numcaches = list(map(int, input().strip().split()))
+    DCLATENCIES[i] = latency
+
+    for j in range(numcaches):
+        curcachenode, curcachelatency = list(map(int, input().strip().split()))
+        ECACHETIMES[i][curcachenode] = curcachelatency
+
+REQS = []
+NUMINDREQS = 0
+for i in range(R):
+    reqlist = list(map(int, input().strip().split()))
+    reqs.append(reqlist)
+    NUMINDREQS += reqlist[2]
+    
+
+geneset_videos = range(V)
 
 MAXGENERATIONS = 100
 TESTSPERSETUP = 2 # 10
 TESTLOSSEXPONENT = 2.0
 
+BINMUTRATEMIN = 0.1 # on average, when a bin is mutated, remove 20% of the videos (regardless of capacity)
+BINMUTRATEMAX = 0.5 # change this lower for large values
 
 
+#MAXSWAPRATE = 0.1
+MAXSWAPNUM = 5
+MAXSWAPS = MAXSWAPNUM
+#NUMSWAPPARTICIPANTRATE = 1.0 # 0.0 for no swaps to 1.0
+#NUMSWAPPARTICIPANT = math.ceil(NUMPARENTS * NUMSWAPPARTICIPANTRATE)
+# implemented this in mutation instead for now
 
-def fitness(x):
-    return sum(e[0] == e[1] for e in zip(target, x))
 
-print( fitness(target) )
+def fitness(state):
+    mssaved = 0
+    for req in REQS:
+        vid, endpt, nreqs = req
+
+        dcreqtime = DCLATENCIES[endpt]
+        minreqtime = dcreqtime
+        for ccacheid in ECACHETIMES[endpt]:
+            if state[ccacheid].contains(vid):
+                minreqtime = ECACHETIMES[endpt][ccacheid]
+                
+        mssaved = (dcreqtime - minreqtime) * nreqs
+
+    return mssaved / NUMINDREQS * 1000
+
+
+#print( fitness(target) )
 
 def genParent():
-    return "".join(random.choice(geneset) for i in range(N))
+
+    parent = []
+
+    for i in range(V):
+        csize = 0
+        cset = set()
+        while 1:
+            video = random.choice(geneset_videos)
+
+            if csize + newsize <= X:
+                cset.add(video)
+            else:
+                break # don't try to pack it at this stage
+            
+        parent.append(cset)
+
+    return parent
+
 
 def isValidElement(child):
-    return len(child) == N
+    return sum(VSIZES[e] for e in binset) <= X
 
-def breed(strs):
-    P = len(strs)
+def breed(states):
+
+    P = len(states)
 
     children = []
 
     for c in range(NUMCHILDREN):
+
+        # Crossover
         splitlocs = [0] + sorted([random.choice(range(N)) for i in range(NUMSPLITS-1)]) + [N] # doesn't guarantee unique
 
         splitchoices = [random.choice(range(P))]
@@ -59,7 +119,15 @@ def breed(strs):
                 print(strs[splitchoices[i]], strs)
             cchild += strs[splitchoices[i]][splitlocs[i]:splitlocs[i+1]]
 
+        # Swaps
+        '''
+        swaps = random.randint(0, MAXSWAPS)
 
+        for i in range(MAXSWAPS):
+            participants = random.sample(NUMSWAPPARTICIPANTRATE)
+        '''
+            
+        
         # Mutate
         if random.random() < MUTCHANCE:
             cchild = mutate(cchild)
@@ -68,19 +136,51 @@ def breed(strs):
         
         children.append(cchild)
 
+        
+
     return children
+
+
+def mutate_bin(binset):
+    # return a mutated bin; helper for mutate()
+    numtoremove = math.floor(binmutrate * len(binset))
+    toremove = random.sample(binset, numtoremove)
+    for elremove in binset:
+        binset.remove(elremove)
+
+    csize = sum(VSIZES[e] for e in binset)
+    while 1:
+        video = random.choice(geneset_videos)
+
+        if csize + newsize <= X:
+            cset.add(video)
+        else:
+            break # don't try to pack it at this stage
     
-def mutate(strc):
+    return binset
+    
+
+def mutate(state):
     nummutations = random.randint(MINMUTATIONS, MAXMUTATIONS+1)
 
     inds = random.sample(range(len(strc)), nummutations)
-    stra = [e for e in strc]
-    for ind in inds:
-        stra[ind] = random.choice(geneset) # choose randomly
 
-    ans = ''.join(stra)
-    return ans
+    for ind in inds:
+        binmutrate = random.random(BINMUTRATEMIN, BINMUTRATEMAX)
+        state[ind] = mutate_bin(state[ind], binmutrate)
+
+    swaps = random.randint(0, MAXSWAPS) # this could be a hyperparam function or distribution
+
+    for i in range(swaps):
+        bins = random.sample(range(E),2)
+        state[bins[0]], state[bins[1]] = state[bins[1]], state[bins[0]]
+
+    return state # to be consistent for other problems, we return reference to the state
     
+
+def lateral_transfer(parents):
+    return parents
+
 def select_children(children):
     return children[:int(POPSIZE * 0.8)] + children[int(POPSIZE * 0.5): int(POPSIZE * 0.5) + POPSIZE-int(POPSIZE * 0.8)]
     
@@ -140,6 +240,9 @@ def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, 
 
     print(strength)
     return 1/strength  #change this to return the fitness after 5 seconds
+
+    now = datetime.now()
+    fout = open("ans_"+FNAME_PREFIX+"+now.strftime("%Y%m%d-%H%M%S.%f")+".out")
 
 
 if __name__=='__main__':
