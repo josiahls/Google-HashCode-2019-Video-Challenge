@@ -5,7 +5,7 @@ State:
 
 """
 from bayes_opt import BayesianOptimization, JSONLogger, Events
-from src.JosiahGeneticAlg import GeneticAlgorithm
+from src.JosiahGeneticAlgTest import GeneticAlgorithm
 
 if __name__ == '__main__':
     X = "Hello world!"
