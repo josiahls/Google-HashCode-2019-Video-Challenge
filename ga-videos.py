@@ -2,6 +2,7 @@ import string
 import random
 import time
 import math
+import sys
 from datetime import datetime
 random.seed(1)
 
@@ -9,6 +10,7 @@ random.seed(1)
 THRESHFITNESS = 10**100 #MAXFITNESS # for benchmarking only
 
 DOPRINTGEN = 1 # show progress by generation with winning one
+DOWRITEEVERY = 0
 
 FNAME_PREFIX = 'input/me_at_the_zoo'
 
@@ -43,7 +45,7 @@ TESTSPERSETUP = 2 # 10
 TESTLOSSEXPONENT = 2.0
 
 BINMUTRATEMIN = 0.1 # on average, when a bin is mutated, remove 20% of the videos (regardless of capacity)
-BINMUTRATEMAX = 0.3 # change this lower for large values
+BINMUTRATEMAX = 0.2 # change this lower for large values
 
 
 #MAXSWAPRATE = 0.1
@@ -277,7 +279,17 @@ def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, 
             if DOPRINTGEN:
                 print("Gen "+str(g)+" max fitness "+str(maxfitness)+" with "+str(children[0]))
 
-            print("Gen "+str(g)+" max fitness "+fitnesses)
+            if DOWRITEEVERY:
+                fout = open(FNAME_PREFIX+"_ans_"+now.strftime("%Y%m%d-%H%M%S.%f")+".out", 'w')
+
+                beststate = children[0]
+                towrite = str(C)+"\n"
+                for i in range(C):
+                    towrite += str(i)+" "+" ".join(str(e) for e in list(beststate[i]))
+                fout.write(towrite)
+                fout.close()
+
+            print("Gen "+str(g)+" fitnesses "+", ".join(str(e) for e in fitnesses))
             parents = children
 
             if fitness(children[0]) >= THRESHFITNESS:
