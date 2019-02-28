@@ -8,35 +8,31 @@ class GeneticAlgorithm:
     def __init__(self, number_of_children,
                  number_of_splits,
                  number_of_parents,
-                 number_parents_to_keep,
                  mutation_chance,
                  parents_generation_rate,
                  parent_keep_rate,
-                 bi_min_mutations,
-                 bi_max_mutations,
+                 bin_min_mutations,
+                 bin_max_mutations,
                  min_mutations,
                  max_mutations,
                  max_inner_splits,
                  max_swap_num,
                  population_size,
                  iterations,
-                 loss_exp,
-                 thresh_fitness,
                  max_generations,
+                 loss_exp=1,
                  print_generation=1,
-                 out_file_name_prefix='a',
-                 new_parents_per_generation=None):
+                 out_file_name_prefix='a'):
         """
 
         :param number_of_children:
         :param number_of_splits:
         :param number_of_parents:
-        :param number_parents_to_keep:
         :param mutation_chance:
         :param parents_generation_rate:
         :param parent_keep_rate:
-        :param bi_min_mutations:
-        :param bi_max_mutations:
+        :param bin_min_mutations:
+        :param bin_max_mutations:
         :param min_mutations:
         :param max_mutations:
         :param max_inner_splits:
@@ -44,11 +40,9 @@ class GeneticAlgorithm:
         :param population_size:
         :param iterations:
         :param loss_exp:
-        :param thresh_fitness:
         :param max_generations:
         :param print_generation:
         :param out_file_name_prefix:
-        :param new_parents_per_generation:
         """
 
         random.seed(1)
@@ -110,8 +104,8 @@ class GeneticAlgorithm:
         self.iterations = iterations
         self.loss_exp = loss_exp
 
-        self.bi_min_mutations = bi_min_mutations  # on average, when a bin is mutated, remove 20% of the videos (regardless of capacity)
-        self.bi_max_mutations = bi_max_mutations  # change this lower for large values
+        self.bin_min_mutations = bin_min_mutations  # on average, when a bin is mutated, remove 20% of the videos (regardless of capacity)
+        self.bin_max_mutations = bin_max_mutations  # change this lower for large values
 
         self.max_swap_num = max_swap_num
         self.max_inner_splits = max_inner_splits
@@ -128,27 +122,25 @@ class GeneticAlgorithm:
         self.parent_keep_rate = parent_keep_rate
         self.parents_generation_rate = parents_generation_rate
 
-        self.thresh_fitness = thresh_fitness
+        self.thresh_fitness = 10**100
 
         """ Some of these parameters are better set automatically """
-        _auto_size = int(self.parent_keep_rate * self.population_size)
-        self.number_parents_to_keep = _auto_size if number_parents_to_keep is None else number_parents_to_keep
-        self.new_parents_per_generation = _auto_size if number_parents_to_keep is None else new_parents_per_generation
+        self.number_parents_to_keep = int(self.parent_keep_rate * self.population_size)
+        self.new_parents_per_generation = int(self.parents_generation_rate * self.population_size)
 
-    def reset_params(self, max_generations, loss_exp, bi_min_mutations,
-                     bi_max_mutations, max_swap_num, max_inner_splits, max_mutations,
+
+    def reset_params(self, max_generations, bin_min_mutations,
+                     bin_max_mutations, max_swap_num, max_inner_splits, max_mutations,
                      min_mutations, number_of_splits, number_of_children,
-                     number_of_parents, mutation_chance, population_size, 
-                     parent_keep_rate, parents_generation_rate,
-                     new_parents_per_generation, number_parents_to_keep=0, thresh_fitness=None, iterations=None):
+                     number_of_parents, mutation_chance, population_size,
+                     parent_keep_rate, parents_generation_rate,  iterations=None):
         
         self.max_generations = int(max_generations)
         if iterations is not None:
             self.iterations = int(iterations)
-        self.loss_exp = int(loss_exp)
 
-        self.bi_min_mutations = int(bi_min_mutations)  # on average, when a bin is mutated, remove 20% of the videos (regardless of capacity)
-        self.bi_max_mutations = int(bi_max_mutations)  # change this lower for large values
+        self.bin_min_mutations = int(bin_min_mutations)  # on average, when a bin is mutated, remove 20% of the videos (regardless of capacity)
+        self.bin_max_mutations = int(bin_max_mutations)  # change this lower for large values
 
         self.max_swap_num = int(max_swap_num)
         self.max_inner_splits = int(max_inner_splits)
@@ -165,14 +157,9 @@ class GeneticAlgorithm:
         self.parent_keep_rate = parent_keep_rate
         self.parents_generation_rate = parents_generation_rate
 
-        self.thresh_fitness = int(thresh_fitness) if thresh_fitness is not None else self.thresh_fitness
-
-        number_parents_to_keep = None if number_parents_to_keep == 0 else int(number_parents_to_keep)
         """ Some of these parameters are better set automatically """
-        _auto_size = int(self.parent_keep_rate * self.population_size)
-        self.number_parents_to_keep = _auto_size if number_parents_to_keep is None else int(number_parents_to_keep)
-        _auto_size = int(self.parents_generation_rate * self.population_size)
-        self.new_parents_per_generation = _auto_size if number_parents_to_keep is None else int(new_parents_per_generation)
+        self.number_parents_to_keep = int(self.parent_keep_rate * self.population_size)
+        self.new_parents_per_generation = int(self.parents_generation_rate * self.population_size)
 
     def fitness(self, state):
         mssaved = 0
@@ -326,7 +313,7 @@ class GeneticAlgorithm:
         inds = random.sample(range(len(state)), nummutations)
 
         for ind in inds:
-            binmutrate = random.uniform(self.bi_min_mutations, self.bi_max_mutations)
+            binmutrate = random.uniform(self.bin_min_mutations, self.bin_max_mutations)
             state[ind] = self.mutate_bin(state[ind], binmutrate)
 
         swaps = random.randint(0, self.max_swap_num)  # this could be a hyperparam function or distribution
@@ -420,7 +407,6 @@ if __name__ == '__main__':
     alg = GeneticAlgorithm(number_of_children=2,
                            number_of_splits=4,
                            number_of_parents=3,
-                           number_parents_to_keep=None, # check this one, should be dependent on parent_keep_rate
                            mutation_chance=0.2,
                            parents_generation_rate=0.2,
                            parent_keep_rate=0.2,
@@ -428,11 +414,10 @@ if __name__ == '__main__':
                            max_mutations=1,
                            population_size=400,
                            iterations=2,
-                           loss_exp=2.0, # remove
                            max_generations=100,
-                           thresh_fitness=10**100, # remove
-                           bi_max_mutations=0.1,
-                           bi_min_mutations=0.5,
+                           thresh_fitness=10**100,  # remove
+                           bin_max_mutations=0.1,
+                           bin_min_mutations=0.5,
                            max_inner_splits=5,
                            max_swap_num=5)
     print(f'Fitness strength is: {alg.search()}')
