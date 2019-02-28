@@ -38,7 +38,7 @@ for i in range(R):
 
 geneset_videos = range(V)
 
-MAXGENERATIONS = 100
+MAXGENERATIONS = 300
 TESTSPERSETUP = 2 # 10
 TESTLOSSEXPONENT = 2.0
 
@@ -142,6 +142,38 @@ def breed(states):
                 # print(strs[splitchoices[i]], strs)
             cchild += states[splitchoices[i]][splitlocs[i]:splitlocs[i+1]]
 
+        # do again:
+        cchild = []
+
+        # Crossover at deeper level
+        for h in range(C):
+            csize = 0
+            cset = set()
+
+            numinnersplits = random.randint(1, MAXINNERSPLITS)
+
+            splitchoices = [random.choice(range(P))]
+            for i in range(1, numinnersplits):
+                # random excluding prior choice:
+                choice = random.choice(range(P-1))
+                if choice <= splitchoices[i-1]: choice += 1
+                splitchoices.append(choice)
+
+            for i in range(numinnersplits): # random this 1 to max
+                curchoices = list(states[splitchoices[i]][h])
+                if len(curchoices) > 0:
+                    while 1:
+                        video = random.choice(curchoices)
+                        newsize = VSIZES[video]
+
+                        if csize + newsize <= (i/float(numinnersplits)) * X: # yeah, there is a slight bias the first one sends less but this evens out as the selection is random
+                            cset.add(video)
+                            csize += newsize
+                        else:
+                            break # don't try to pack it at this stage
+
+            cchild.append(cset)
+
         # Swaps
         '''
         swaps = random.randint(0, MAXSWAPS)
@@ -211,7 +243,7 @@ def select_children(children):
     return children[:int(POPSIZE * 0.8)] + children[int(POPSIZE * 0.5): int(POPSIZE * 0.5) + POPSIZE-int(POPSIZE * 0.8)]
     
 
-def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, NEWPARENTSPERGENRATE, PARENTSKEPTRATE, MUTCHANCE):
+def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, NEWPARENTSPERGENRATE, PARENTSKEPTRATE, MUTCHANCE, MAXINNERSPLITS):
     totaltime = 0
     numconverged = 0
 
@@ -294,6 +326,8 @@ if __name__=='__main__':
     MAXMUTATIONS = 1
     NEWPARENTSPERGENRATE = 0.2
 
+    MAXINNERSPLITS = 5
+
     PARENTSKEPTRATE = 0.2
 
     NEWPARENTSPERGEN = int(NEWPARENTSPERGENRATE * POPSIZE)
@@ -303,7 +337,7 @@ if __name__=='__main__':
 
     MUTCHANCE = 0.2
 
-    print(ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, NEWPARENTSPERGENRATE, PARENTSKEPTRATE, MUTCHANCE))
+    print(ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, NEWPARENTSPERGENRATE, PARENTSKEPTRATE, MUTCHANCE, MAXINNERSPLITS))
 
 
     
