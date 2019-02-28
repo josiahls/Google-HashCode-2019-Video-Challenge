@@ -86,9 +86,9 @@ def run_optimization():
                 'parent_keep_rate': (0.1, 1),
                 'min_mutations': (1, 2),
                 'max_mutations': (1, 2),
-                'population_size': (10, 100 * 2),
+                'population_size': (10, 200 * 2),
                 'loss_exp': (1, 1),
-                'max_generations': (2, 2),
+                'max_generations': (25, 50),
                 'bi_max_mutations': (1, 4),
                 'bi_min_mutations': (1, 2),
                 'max_inner_splits': (1, 3),
@@ -121,6 +121,14 @@ if __name__ == '__main__':
     optimizer_id = 0
 
     targets = (
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
         run_optimization,
         run_optimization,
         run_optimization,
