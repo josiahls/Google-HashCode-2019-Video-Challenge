@@ -2,6 +2,11 @@ import random
 import time
 import math
 from datetime import datetime
+import sys
+
+
+
+FNAME_PREFIX = '../photo_input/a_example.txt'
 
 
 class GeneticAlgorithm:
@@ -62,9 +67,11 @@ class GeneticAlgorithm:
 
         self.TAGSET = set()
         TAGSET2ID = dict()
-        for i in range(N):
+        for i in range(self.N):
             lline = list(map(str, input().strip().split()))
             self.TAGS_S.append(lline[2:])
+            for e in lline[2:]:
+                self.TAGSET.add(e)
             for tag in self.TAGS_S[i]:
                 tag = 1
             self.TYPE.append(lline[0])
@@ -74,18 +81,19 @@ class GeneticAlgorithm:
             elif lline[0] == 'V':
                 self.NUMV += 1
                 self.VINDS.append(i)
-            
+
         assert self.NUMV + self.NUMH == self.N
-        
+
         x = 0
         for tag in self.TAGSET:
             TAGSET2ID[tag] = x
+            x += 1
 
         self.TAGS = []
         for i in range(len(self.TAGS_S)):
             self.TAGS.append(set(TAGSET2ID[t] for t in self.TAGS_S[i]))
 
-        print(self.TAGS)
+        print("Tags", self.TAGS)
 
         '''
         self.video_sizes = list(map(int, input().strip().split()))  # they start at 0 so list with 0 index is ok
@@ -123,7 +131,7 @@ class GeneticAlgorithm:
         self.max_inner_splits = max_inner_splits
         self.max_mutations = max_mutations
         self.min_mutations = min_mutations
-        
+
         self.number_of_splits = number_of_splits
         self.number_of_children = number_of_children
         self.number_of_parents = number_of_parents
@@ -146,7 +154,7 @@ class GeneticAlgorithm:
                      min_mutations, number_of_splits, number_of_children,
                      number_of_parents, mutation_chance, population_size,
                      parent_keep_rate, parents_generation_rate,  iterations=None):
-        
+
         self.max_generations = int(max_generations)
         if iterations is not None:
             self.iterations = int(iterations)
@@ -174,70 +182,142 @@ class GeneticAlgorithm:
         self.new_parents_per_generation = int(self.parents_generation_rate * self.population_size)
 
 
-    def fithelper(twoimgs):
+    def fithelper(self, twoimgs):
+        #print("t",twoimgs)
         tagsl = set()
         for e in twoimgs[0]:
-            for tag in e:
-                tagsl.add(e)
+            tagsl.add(e)
         tagsr = set()
         for e in twoimgs[1]:
-            for tag in e:
-                tagsr.add(e)
-        tagsboth = tagsl.intersect(tagsr)
+            tagsr.add(e)
+        tagsboth = tagsl & tagsr
 
         return min(len(tagsboth), len(tagsl.difference(tagsr)), len(tagsr.difference(tagsl)))
-        
+
     def fitness(self, state):
         totalfitness = 0
-        for i in range(state-1):
-            total += fithelper(state[i:i+2])
+        for i in range(len(state)-1):
+            totalfitness += self.fithelper(state[i:i+2])
 
         return totalfitness
 
     def help_of_element(self, state, i):
-        return (fitness(state[i-1:i+1]) + fitness(state[i:i+2]))/2
-        
+        return (self.fitness(state[i-1:i+1]) + self.fitness(state[i:i+2]))/2
+
     def generate_parent(self):
         parent = []
+        used = set()
         for i in range(self.N):
             rand = random.random()
             if rand < (self.NUMH/(self.NUMH + int(self.NUMV/2))):
-                parent.append( [random.choice(self.HINDS)] )
-            else:
-                parent.append( random.sample(self.VINDS, 2) )
 
+                touse = random.choice(self.HINDS)
+                works = 0
+                count = 0
+
+                while touse in used and count < self.N * 8:
+                    touse = random.choice(self.HINDS)
+                    works = 1
+                    count += 1
+                if not works:
+                    break
+                used.add(touse)
+                parent.append( (touse, ) )
+            else:
+                touse = random.sample(self.VINDS, 2)
+
+                works = 0
+                count = 0
+                while any(e in used for e in touse) and count < self.N * 14:
+                    touse = random.sample(self.VINDS, 2)
+                    works = 1
+                    count += 1
+
+                if not works:
+                    break
+                for touse_e in touse:
+                    used.add(touse_e)
+                parent.append( tuple(touse) )
+        print("made ",parent)
+
+        for e in parent:
+            assert isinstance(e, tuple)
         return parent
-            
+
     def is_valid_element(self, state):
-        return len(state) <= self.N and all(len(state[i]) == 1 and all(self.TYPE[e] == 'H' for e in state[i]) or len(state[i]) == 2 and all(self.TYPE[e] == 'V' for e in state[i]) for i in range(N))
+        flatlist = [item for sublist in state for item in sublist]
+        return len(state) <= self.N and all(len(state[i]) == 1 and all(self.TYPE[e] == 'H' for e in state[i]) or len(state[i]) == 2 and all(self.TYPE[e] == 'V' for e in state[i]) for i in range(N)) and len(flatlist) == len(set(flatlist))
+        # also could check no element exceeds N-1
         #return len(state) == self.c and all(sum(self.video_sizes[e] for e in binset) <= self.x for binset in state)
 
-    def breed(self, states):
+    def breed(self, states, helpdictavg, helpdictmax):
+        #print(states)
         P = len(states)
         assert P == self.number_of_parents
 
         children = []
 
-        N = len(states[0])  # or any other in the array
-        assert N == self.c
+        N = self.N # for this function
+
+        parentsrev = []
+        for i in range(P):
+            cset = dict()
+            for j in range(len(states[i])):
+                cset[j] = states[i][j]
+            parentsrev.append(cset)
 
         for c in range(self.number_of_children):
 
-            # Crossover
-            splitlocs = [0] + sorted([random.choice(range(N)) for i in range(self.number_of_splits - 1)]) + [N]  # doesn't guarantee unique
+            cchild = []
+            used = [0 for i in range(N)]
 
+            # Crossover
+            # splitlocs1 = [0] + sorted([random.choice(range(N)) for i in range(self.number_of_splits - 1)]) + [N]  # doesn't guarantee unique
+            # streaklengths = [splitlocs1[i] - splitlocs1[i-1] for i in range(1,N)]
+
+            curparent = random.choice(states)
+            print("parent", curparent)
+            curindex = random.choice(range(0, len(curparent)))
+
+            while True:
+
+                CHANCETOSWITCHPARENTS = 0.1
+                doswitch = random.random() > CHANCETOSWITCHPARENTS
+                tries = 0
+                worked = False
+                while tries < len(states) * 8 and curindex > len(curparent) or any(used[e] for e in curparent[curindex]) or doswitch:
+                    tries += 1
+                    curparent = random.choice(states) # same 'macro' as the other two lines
+                    curindex = random.choice(range(len(curparent)))
+                    doswitch = False
+                    worked = True
+
+                if not worked:
+                    break
+
+                cchild.append(curparent[curindex])
+
+            # Try as a alternative marching forward and just removing the picture
+            '''
             splitchoices = [random.choice(range(P))]
             for i in range(1, self.number_of_splits):
                 # random excluding prior choice:
                 choice = random.choice(range(P - 1))
                 if choice <= splitchoices[i - 1]: choice += 1
                 splitchoices.append(choice)
+            '''
+
+                # If the next value is already used, we must switch to a different chain.  Take a weighted probability of where that element appears on other chains.
+                # after we can pull no more elements, stop and return this child
+
 
             # print("making child: ", states, P, splitlocs, splitchoices)
 
-            assert len(splitlocs) == self.number_of_splits + 1, f'This locs {len(splitlocs)} != {self.number_of_splits + 1}'
-            assert len(splitchoices) == self.number_of_splits, f'This choices {len(splitchoices)} != {self.number_of_splits}'
+            # assert len(splitlocs) == self.number_of_splits + 1, f'This locs {len(splitlocs)} != {self.number_of_splits + 1}'
+            # assert len(splitchoices) == self.number_of_splits, f'This choices {len(splitchoices)} != {self.number_of_splits}'
             # cchild = ''.join(strs[splitchoices[i]][splitlocs[i]:splitlocs[i+1]] for i in range(self.number_of_splits))
+            # # find weak transitions.  First find all the transitions.  Then take from these
+            '''
             cchild = []
             for i in range(self.number_of_splits):
                 if not isinstance(states[splitchoices[i]], list) and (isinstance(states[splitchoices[i]][j], set) for j
@@ -278,6 +358,8 @@ class GeneticAlgorithm:
                                 break  # don't try to pack it at this stage
 
                 cchild.append(cset)
+            '''
+
 
             # Swaps
             '''
@@ -319,6 +401,13 @@ class GeneticAlgorithm:
         return binset
 
     def mutate(self, state):
+
+        '''
+
+        :param state:
+        :return:
+        '''
+        '''
         nummutations = random.randint(self.min_mutations, self.max_mutations + 1)
 
         inds = random.sample(range(len(state)), nummutations)
@@ -332,6 +421,7 @@ class GeneticAlgorithm:
         for i in range(swaps):
             bins = random.sample(range(self.e), 2)
             state[bins[0]], state[bins[1]] = state[bins[1]], state[bins[0]]
+        '''
 
         return state  # to be consistent for other problems, we return reference to the state
 
@@ -352,15 +442,34 @@ class GeneticAlgorithm:
             current_iter = f
             starttime = time.time()
 
-            parents = [self.generate_parent() for i in range(100)]
+            parents = [self.generate_parent() for i in range(self.population_size)]
             # print(parents)
 
             for g in range(self.max_generations):
 
                 children = []
                 # children = [breed([random.choice(parents) for _ in range(self.number_of_parents)]) for d in range(2 * self.population_size)]
+
+                helpdict = dict() # this is not yet great for vertical pics, as keeps them together
+                for parent in parents:
+                    for i in range(len(parent)):
+                        element = parent[i]
+                        val = self.help_of_element(parent, i)
+
+                        if not element in helpdict:
+                            helpdict[element] = set()
+                        helpdict[element].add(val)
+
+                helpdictavg = dict()
+                for element in helpdict:
+                    helpdictavg[element] = sum(helpdict[element]) / len(helpdict[element])
+
+                helpdictmax = dict()
+                for element in helpdict:
+                    helpdictmax[element] = max(helpdict[element])
+
                 for d in range(2 * self.population_size):
-                    children += self.breed([random.choice(parents) for _ in range(self.number_of_parents)])
+                    children += self.breed([random.choice(parents) for _ in range(self.number_of_parents)], helpdictavg, helpdictmax)
 
                 children += parents[:self.number_parents_to_keep]
                 children += [self.generate_parent() for i in range(self.new_parents_per_generation)]
@@ -415,6 +524,8 @@ class GeneticAlgorithm:
 
 
 if __name__ == '__main__':
+    sys.stdin = open(FNAME_PREFIX)
+
     alg = GeneticAlgorithm(number_of_children=2,
                            number_of_splits=4,
                            number_of_parents=3,
