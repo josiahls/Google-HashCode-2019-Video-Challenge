@@ -136,7 +136,7 @@ def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, 
     strength = avgtime * (TESTSPERSETUP**TESTLOSSEXPONENT)
 
     print(strength)
-    return strength
+    return 1/strength  #change this to return the fitness after 5 seconds
 
 
 if __name__=='__main__':
