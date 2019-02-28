@@ -38,7 +38,7 @@ def run_optimization():
                            bin_min_mutations=0.5,
                            max_inner_splits=5,
                            max_swap_num=5,
-                           out_file_name_prefix='me_'+str(local_id))
+                           out_file_name_prefix='me_' + str(local_id))
     sys.stdin.close()
 
     optimizer_id_queue += 1
@@ -106,6 +106,7 @@ def run_optimization():
     global results
     results.append((optimizer.max['target'], optimizer.max['params']))
     print(f'Optimizer {optimizer_id} Ending with target {optimizer.max["target"]}')
+
 
 if __name__ == '__main__':
     results = []

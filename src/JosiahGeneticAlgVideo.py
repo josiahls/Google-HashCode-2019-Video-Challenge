@@ -406,10 +406,17 @@ if __name__ == '__main__':
                            population_size=400,
                            iterations=2,
                            loss_exp=2.0,
-                           max_generations=100,
-                           thresh_fitness=10**100,
+                           max_generations=2,
+                           thresh_fitness=10 ** 100,
                            bi_max_mutations=0.1,
                            bi_min_mutations=0.5,
                            max_inner_splits=5,
-                           max_swap_num=5)
+                           max_swap_num=5,
+                           out_file_name_prefix='me_'+str(0))
+
+    param_dict = {}
+
+    alg.reset_params(**param_dict)
+
+
     print(f'Fitness strength is: {alg.search()}')

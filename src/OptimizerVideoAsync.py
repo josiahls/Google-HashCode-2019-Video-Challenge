@@ -77,12 +77,12 @@ def run_optimization():
         print(f'Fitness strength is: {fitness}')
         return fitness
 
-    p_bounds = {'number_of_children': (2, 3),
-                'number_of_splits': (1, 3),
-                'number_of_parents': (2, 3),
-                'number_parents_to_keep': (1, 3),
-                'mutation_chance': (0, 1),
-                'parents_generation_rate': (0, 1),
+    p_bounds = {'number_of_children': (2, 5),
+                'number_of_splits': (1, 5),
+                'number_of_parents': (2, 5),
+                'number_parents_to_keep': (1, 10),
+                'mutation_chance': (0.1, 1),
+                'parents_generation_rate': (0.1, 1),
                 'parent_keep_rate': (0.1, 1),
                 'min_mutations': (1, 2),
                 'max_mutations': (1, 2),
@@ -106,8 +106,8 @@ def run_optimization():
     optimizer.subscribe(Events.OPTMIZATION_END, logger)
 
     optimizer.maximize(
-        init_points=0,
-        n_iter=1,
+        init_points=25,
+        n_iter=50,
     )
 
     print('The max is: ')
