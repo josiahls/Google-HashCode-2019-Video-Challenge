@@ -215,10 +215,13 @@ class GeneticAlgorithm:
                 works = 0
                 count = 0
 
-                while touse in used and count < self.N * 8:
-                    touse = random.choice(self.HINDS)
-                    works = 1
+                while count < self.N * 8:
+
                     count += 1
+                    touse = random.choice(self.HINDS)
+                    if touse not in used:
+                        works = 1
+                        break
                 if not works:
                     break
                 used.add(touse)
@@ -228,25 +231,32 @@ class GeneticAlgorithm:
 
                 works = 0
                 count = 0
-                while any(e in used for e in touse) and count < self.N * 14:
+                while count < self.N * 14:
                     touse = random.sample(self.VINDS, 2)
-                    works = 1
                     count += 1
+
+                    if not any(e in used for e in touse):
+                        works = 1
+                        break
 
                 if not works:
                     break
                 for touse_e in touse:
                     used.add(touse_e)
                 parent.append( tuple(touse) )
-        print("made ",parent)
+        #print("made ",parent)
+
+        assert self.is_valid_element(parent)
 
         for e in parent:
             assert isinstance(e, tuple)
         return parent
 
     def is_valid_element(self, state):
+        #return 1
         flatlist = [item for sublist in state for item in sublist]
-        return len(state) <= self.N and all(len(state[i]) == 1 and all(self.TYPE[e] == 'H' for e in state[i]) or len(state[i]) == 2 and all(self.TYPE[e] == 'V' for e in state[i]) for i in range(N)) and len(flatlist) == len(set(flatlist))
+        N = self.N
+        return len(state) <= self.N and all(len(state[i]) == 1 and all(self.TYPE[e] == 'H' for e in state[i]) or len(state[i]) == 2 and all(self.TYPE[e] == 'V' for e in state[i]) for i in range(len(state))) and len(flatlist) == len(set(flatlist))
         # also could check no element exceeds N-1
         #return len(state) == self.c and all(sum(self.video_sizes[e] for e in binset) <= self.x for binset in state)
 
@@ -276,7 +286,7 @@ class GeneticAlgorithm:
             # streaklengths = [splitlocs1[i] - splitlocs1[i-1] for i in range(1,N)]
 
             curparent = random.choice(states)
-            print("parent", curparent)
+            #print("parent", curparent)
             curindex = random.choice(range(0, len(curparent)))
 
             while True:
@@ -295,6 +305,8 @@ class GeneticAlgorithm:
                 if not worked:
                     break
 
+                for e in curparent[curindex]:
+                    used[e] = 1
                 cchild.append(curparent[curindex])
 
             # Try as a alternative marching forward and just removing the picture
@@ -370,11 +382,11 @@ class GeneticAlgorithm:
             '''
 
             # Mutate
-            if random.random() < self.mutation_chance:
-                cchild = self.mutate(cchild)
+            #if random.random() < self.mutation_chance:
+            #    cchild = self.mutate(cchild)
 
             # print(cchild)
-            assert self.is_valid_element(cchild), 'This child is invalid'
+            assert self.is_valid_element(cchild), str(cchild)#'This child is invalid'
 
             children.append(cchild)
 
@@ -439,6 +451,7 @@ class GeneticAlgorithm:
         print("Testing parameters...")
         current_iter = 0
         for f in range(self.iterations):
+            print("iter",f)
             current_iter = f
             starttime = time.time()
 
