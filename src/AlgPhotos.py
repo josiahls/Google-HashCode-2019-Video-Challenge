@@ -538,7 +538,7 @@ class GeneticAlgorithm:
         print(strength)
 
         now = datetime.now()
-        fout = open("logs/ans_" + self.out_file_name_prefix + now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
+        fout = open(self.out_file_name_prefix + now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
 
         beststate = children[0]
         towrite = str(self.c) + "\n"
