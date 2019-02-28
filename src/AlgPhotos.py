@@ -295,11 +295,23 @@ class GeneticAlgorithm:
                 doswitch = random.random() > CHANCETOSWITCHPARENTS
                 tries = 0
                 worked = False
-                while tries < len(states) * 8 and curindex > len(curparent) or any(used[e] for e in curparent[curindex]) or doswitch:
+
+                curparent = random.choice(states)  # same 'macro' as the other two lines
+                curindex = random.choice(range(len(curparent)))
+
+                while tries < len(states) * 8:
                     tries += 1
-                    curparent = random.choice(states) # same 'macro' as the other two lines
-                    curindex = random.choice(range(len(curparent)))
+
+                    if curindex < len(curparent) and not any(used[e] for e in curparent[curindex]):
+                        #print("r")
+                        worked = 1
+                        break
+                    else:
+                        curparent = random.choice(states) # same 'macro' as the other two lines
+                        curindex = random.choice(range(len(curparent)))
                     doswitch = False
+
+                if tries < len(states) * 8:
                     worked = True
 
                 if not worked:
@@ -308,6 +320,7 @@ class GeneticAlgorithm:
                 for e in curparent[curindex]:
                     used[e] = 1
                 cchild.append(curparent[curindex])
+                #print(cchild)
 
             # Try as a alternative marching forward and just removing the picture
             '''
@@ -390,6 +403,7 @@ class GeneticAlgorithm:
 
             children.append(cchild)
 
+        #print(children)
         return children
 
     def mutate_bin(self, binset, binmutrate):
@@ -547,9 +561,9 @@ if __name__ == '__main__':
                            parent_keep_rate=0.2,
                            min_mutations=1,
                            max_mutations=1,
-                           population_size=400,
+                           population_size=20,
                            iterations=2,
-                           max_generations=100,
+                           max_generations=10,
                            bin_max_mutations=0.1,
                            bin_min_mutations=0.5,
                            max_inner_splits=5,
