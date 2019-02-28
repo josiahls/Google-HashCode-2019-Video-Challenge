@@ -58,7 +58,30 @@ class GeneticAlgorithm:
         self.out_file_name_prefix = out_file_name_prefix
 
         """ Load Program Data """
-        self.v, self.e, self.r, self.c, self.x = list(map(int, input().strip().split()))
+        self.N = list(map(int, input().strip().split()))
+        self.TAGS_S = []
+        self.TYPE = []
+
+        self.TAGSET = set()
+        TAGSET2ID = dict()
+        for i in range(N):
+            lline = list(map(int, input().strip().split()))
+            self.TAGS_S.append(lline[2:])
+            for tag in self.TAGS_S[i]:
+                tag = 1
+            self.TYPE.append(lline[0])
+
+        x = 0
+        for tag in self.TAGSET:
+            TAGSET2ID[tag] = x
+
+        self.TAGS = []
+        for i in range(len(self.TAGS_S)):
+            self.TAGS.append(set(TAGSET2ID[t] for t in self.TAGS_S[i]))
+
+        print(self.TAGS)
+
+        '''
         self.video_sizes = list(map(int, input().strip().split()))  # they start at 0 so list with 0 index is ok
         assert len(self.video_sizes) == self.v
         self.e_cache_times = [dict() for _ in range(self.e)]
@@ -80,6 +103,7 @@ class GeneticAlgorithm:
             self.min_requests += request_list[2]
 
         self.geneset_videos = range(self.v)
+        '''
 
         """ Changeable Params """
         self.max_generations = max_generations
@@ -109,7 +133,6 @@ class GeneticAlgorithm:
         """ Some of these parameters are better set automatically """
         _auto_size = int(self.parent_keep_rate * self.population_size)
         self.number_parents_to_keep = _auto_size if number_parents_to_keep is None else number_parents_to_keep
-        _auto_size = int(self.parents_generation_rate * self.population_size)
         self.new_parents_per_generation = _auto_size if number_parents_to_keep is None else new_parents_per_generation
 
     def reset_params(self, max_generations, loss_exp, bi_min_mutations,
