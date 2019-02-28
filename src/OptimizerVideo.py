@@ -92,8 +92,8 @@ if __name__ == '__main__':
     optimizer.subscribe(Events.OPTMIZATION_STEP, logger)
 
     optimizer.maximize(
-        init_points=20,
-        n_iter=50,
+        init_points=2,
+        n_iter=3,
     )
 
     print('The max is: ')

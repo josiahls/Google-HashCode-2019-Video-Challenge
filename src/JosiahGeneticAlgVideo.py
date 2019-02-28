@@ -214,8 +214,8 @@ class GeneticAlgorithm:
 
             # print("making child: ", states, P, splitlocs, splitchoices)
 
-            assert len(splitlocs) == self.number_of_splits + 1
-            assert len(splitchoices) == self.number_of_splits
+            assert len(splitlocs) == self.number_of_splits + 1, f'This locs {len(splitlocs)} != {self.number_of_splits + 1}'
+            assert len(splitchoices) == self.number_of_splits, f'This choices {len(splitchoices)} != {self.number_of_splits}'
             # cchild = ''.join(strs[splitchoices[i]][splitlocs[i]:splitlocs[i+1]] for i in range(self.number_of_splits))
             cchild = []
             for i in range(self.number_of_splits):
@@ -271,7 +271,7 @@ class GeneticAlgorithm:
                 cchild = self.mutate(cchild)
 
             # print(cchild)
-            assert self.is_valid_element(cchild)
+            assert self.is_valid_element(cchild), 'This child is invalid'
 
             children.append(cchild)
 
