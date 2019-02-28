@@ -69,3 +69,4 @@ fabric.properties
 .idea/httpRequests
 
 venv/
+/src/logs.json
