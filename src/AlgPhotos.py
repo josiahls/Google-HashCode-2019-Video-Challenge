@@ -224,8 +224,7 @@ class GeneticAlgorithm:
         for c in range(self.number_of_children):
 
             # Crossover
-            splitlocs = [0] + sorted([random.choice(range(N)) for i in range(self.number_of_splits - 1)]) + [
-                N]  # doesn't guarantee unique
+            splitlocs = [0] + sorted([random.choice(range(N)) for i in range(self.number_of_splits - 1)]) + [N]  # doesn't guarantee unique
 
             splitchoices = [random.choice(range(P))]
             for i in range(1, self.number_of_splits):
@@ -427,7 +426,6 @@ if __name__ == '__main__':
                            population_size=400,
                            iterations=2,
                            max_generations=100,
-                           thresh_fitness=10**100,  # remove
                            bin_max_mutations=0.1,
                            bin_min_mutations=0.5,
                            max_inner_splits=5,
