@@ -19,9 +19,6 @@ MAXGENERATIONS = 100
 TESTSPERSETUP = 2 # 10
 TESTLOSSEXPONENT = 2.0
 
-
-
-
 def fitness(x):
     return sum(e[0] == e[1] for e in zip(target, x))
 
@@ -76,16 +73,16 @@ def mutate(strc):
     inds = random.sample(range(len(strc)), nummutations)
     stra = [e for e in strc]
     for ind in inds:
-        stra[ind] = random.choice(geneset) # choose randomly
+        stra[ind] = random.choice(geneset)  # choose randomly
 
     ans = ''.join(stra)
     return ans
     
 def select_children(children):
     return children[:int(POPSIZE * 0.8)] + children[int(POPSIZE * 0.5): int(POPSIZE * 0.5) + POPSIZE-int(POPSIZE * 0.8)]
-    
 
 def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, NEWPARENTSPERGENRATE, PARENTSKEPTRATE, MUTCHANCE):
+
     totaltime = 0
     numconverged = 0
 
@@ -93,7 +90,7 @@ def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, 
     for f in range(TESTSPERSETUP):
         starttime = time.time()
 
-        
+
         parents = [genParent() for i in range(100)]
         #print(parents)
 
@@ -113,7 +110,7 @@ def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, 
             children = select_children(children)
 
             maxfitness = fitness(children[0])
-            
+
             print("Gen "+str(g)+" max fitness "+str(maxfitness)+" with "+children[0])
             parents = children
 
@@ -160,13 +157,8 @@ if __name__=='__main__':
     NEWPARENTSPERGEN = int(NEWPARENTSPERGENRATE * POPSIZE)
     PARENTSKEPT = int(PARENTSKEPTRATE * POPSIZE)
 
-    
+
 
     MUTCHANCE = 0.2
 
     print(ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, NEWPARENTSPERGENRATE, PARENTSKEPTRATE, MUTCHANCE))
-
-
-    
-                                         
-
