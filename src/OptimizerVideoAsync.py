@@ -1,3 +1,4 @@
+import sys
 import threading
 
 from bayes_opt import BayesianOptimization, JSONLogger, Events
@@ -5,12 +6,20 @@ from src.JosiahGeneticAlgVideo import GeneticAlgorithm
 
 results = []
 optimizer_id = 0
+optimizer_id_queue = 0
 
 
 def run_optimization():
-    global optimizer_id
+    global optimizer_id, optimizer_id_queue
     optimizer_id += 1
+    local_id = optimizer_id
     print(f'Optimizer {optimizer_id} Starting')
+
+    while local_id != 1 and local_id != optimizer_id_queue + 1:
+        pass
+
+    # Let the thread sleep
+    sys.stdin = open('../input/me_at_the_zoo.in')
 
     alg = GeneticAlgorithm(number_of_children=2,
                            number_of_splits=4,
@@ -30,7 +39,10 @@ def run_optimization():
                            bi_min_mutations=0.5,
                            max_inner_splits=5,
                            max_swap_num=5,
-                           out_file_name_prefix='me')
+                           out_file_name_prefix='me_'+str(optimizer_id))
+    sys.stdin.close()
+
+    optimizer_id_queue += 1
 
     # We setup the optimization function
     def maximization_function(number_of_children, number_of_splits, number_of_parents, number_parents_to_keep,
@@ -110,7 +122,13 @@ if __name__ == '__main__':
 
     targets = (
         run_optimization,
-        # run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
         # run_optimization
     )
     optimizer_threads = []

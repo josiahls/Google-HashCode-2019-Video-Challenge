@@ -1,4 +1,5 @@
 import random
+import sys
 import time
 import math
 from datetime import datetime
@@ -52,7 +53,6 @@ class GeneticAlgorithm:
         """
 
         random.seed(1)
-
         """ Testing Params """
         self.print_generation = print_generation  # show progress by generation with winning one
         self.out_file_name_prefix = out_file_name_prefix
