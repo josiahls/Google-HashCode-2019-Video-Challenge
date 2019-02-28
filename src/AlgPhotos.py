@@ -538,12 +538,12 @@ class GeneticAlgorithm:
         print(strength)
 
         now = datetime.now()
-        fout = open(self.out_file_name_prefix + now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
+        fout = open(now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
 
         beststate = children[0]
-        towrite = str(self.c) + "\n"
-        for i in range(self.c):
-            towrite += str(i) + " " + " ".join(str(e) for e in list(beststate[i]))
+        towrite = str(len(children[0])) + "\n"
+        for i in range(len(children[0])):
+            towrite += " ".join(str(e) for e in children[0][i])
         fout.write(towrite)
         fout.close()
 
