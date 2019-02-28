@@ -22,7 +22,7 @@ class GeneticAlgorithm:
                  max_generations,
                  loss_exp=1,
                  print_generation=1,
-                 out_file_name_prefix='a'):
+                 out_file_name_prefix='photoinput/a.in'):
         """
 
         :param number_of_children:
@@ -161,41 +161,29 @@ class GeneticAlgorithm:
         self.number_parents_to_keep = int(self.parent_keep_rate * self.population_size)
         self.new_parents_per_generation = int(self.parents_generation_rate * self.population_size)
 
+
+    def fithelper(twoimgs):
+        tagsl = set()
+        for e in twoimgs[0]:
+            for tag in e:
+                tagsl.add(e)
+        tagsr = set()
+        for e in twoimgs[1]:
+            for tag in e:
+                tagsr.add(e)
+        tagsboth = tagsl.intersect(tagsr)
+
+        return min(len(tagsboth), len(tagsl.difference(tagsr)), len(tagsr.difference(tagsl)))
+        
     def fitness(self, state):
-        mssaved = 0
-        for req in self.requests:
-            vid, endpt, nreqs = req
+        totalfitness = 0
+        for i in range(state-1):
+            total += fithelper(state[i:i+2])
 
-            dcreqtime = self.cd_latencies[endpt]
-            minreqtime = dcreqtime
-            for ccacheid in self.e_cache_times[endpt]:
-                if vid in state[ccacheid]:
-                    minreqtime = min(self.e_cache_times[endpt][ccacheid], minreqtime)
-
-            mssaved += (dcreqtime - minreqtime) * nreqs
-
-        return mssaved * 1000 / self.min_requests
+        return totalfitness
 
     def generate_parent(self):
-        parent = []
-
-        for i in range(self.c):
-            csize = 0
-            cset = set()
-            while 1:
-                video = random.choice(self.geneset_videos)
-                newsize = self.video_sizes[video]
-
-                if csize + newsize <= self.x:
-                    cset.add(video)
-                    csize += newsize
-                else:
-                    break  # don't try to pack it at this stage
-
-            parent.append(cset)
-
-        assert self.is_valid_element(parent)
-        return parent
+        
 
     def is_valid_element(self, state):
         return len(state) == self.c and all(sum(self.video_sizes[e] for e in binset) <= self.x for binset in state)
