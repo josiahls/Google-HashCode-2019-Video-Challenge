@@ -2,7 +2,7 @@ import sys
 import threading
 
 from bayes_opt import BayesianOptimization, JSONLogger, Events
-from .JosiahGeneticAlgVideo import GeneticAlgorithm
+from JosiahGeneticAlgVideo import GeneticAlgorithm
 
 results = []
 optimizer_id = 0
