@@ -52,19 +52,31 @@ class GeneticAlgorithm:
         self.out_file_name_prefix = out_file_name_prefix
 
         """ Load Program Data """
-        self.N = list(map(int, input().strip().split()))
+        self.N = list(map(int, input().strip().split()))[0]
         self.TAGS_S = []
         self.TYPE = []
+        self.NUMV = 0
+        self.NUMH = 0
+        self.HINDS = []
+        self.VINDS = []
 
         self.TAGSET = set()
         TAGSET2ID = dict()
         for i in range(N):
-            lline = list(map(int, input().strip().split()))
+            lline = list(map(str, input().strip().split()))
             self.TAGS_S.append(lline[2:])
             for tag in self.TAGS_S[i]:
                 tag = 1
             self.TYPE.append(lline[0])
-
+            if lline[0] == 'H':
+                self.NUMH += 1
+                self.HINDS.append(i)
+            elif lline[0] == 'V':
+                self.NUMV += 1
+                self.VINDS.append(i)
+            
+        assert self.NUMV + self.NUMH == self.N
+        
         x = 0
         for tag in self.TAGSET:
             TAGSET2ID[tag] = x
@@ -182,11 +194,23 @@ class GeneticAlgorithm:
 
         return totalfitness
 
-    def generate_parent(self):
+    def help_of_element(self, state, i):
+        return (fitness(state[i-1:i+1]) + fitness(state[i:i+2]))/2
         
+    def generate_parent(self):
+        parent = []
+        for i in range(self.N):
+            rand = random.random()
+            if rand < (self.NUMH/(self.NUMH + int(self.NUMV/2))):
+                parent.append( [random.choice(self.HINDS)] )
+            else:
+                parent.append( random.sample(self.VINDS, 2) )
 
+        return parent
+            
     def is_valid_element(self, state):
-        return len(state) == self.c and all(sum(self.video_sizes[e] for e in binset) <= self.x for binset in state)
+        return len(state) <= self.N and all(len(state[i]) == 1 and all(self.TYPE[e] == 'H' for e in state[i]) or len(state[i]) == 2 and all(self.TYPE[e] == 'V' for e in state[i]) for i in range(N))
+        #return len(state) == self.c and all(sum(self.video_sizes[e] for e in binset) <= self.x for binset in state)
 
     def breed(self, states):
         P = len(states)
