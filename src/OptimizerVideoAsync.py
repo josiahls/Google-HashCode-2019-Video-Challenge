@@ -1,3 +1,4 @@
+from datetime import datetime
 import sys
 import threading
 
@@ -39,7 +40,7 @@ def run_optimization():
                            bi_min_mutations=0.5,
                            max_inner_splits=5,
                            max_swap_num=5,
-                           out_file_name_prefix='me_'+str(optimizer_id))
+                           out_file_name_prefix='me_'+str(local_id))
     sys.stdin.close()
 
     optimizer_id_queue += 1
@@ -115,7 +116,6 @@ def run_optimization():
     results.append((optimizer.max['target'], optimizer.max['params']))
     print(f'Optimizer {optimizer_id} Ending with target {optimizer.max["target"]}')
 
-
 if __name__ == '__main__':
     results = []
     optimizer_id = 0
@@ -143,3 +143,12 @@ if __name__ == '__main__':
 
     for result in results:
         print(result[0], "found a maximum value of: {}".format(result[1]))
+
+    now = datetime.now()
+    fout = open("logs/hyper_params" + now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
+
+    towrite = "\n"
+    for result in results:
+        towrite += str(result) + '\n'
+    fout.write(towrite)
+    fout.close()

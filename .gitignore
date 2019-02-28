@@ -70,3 +70,4 @@ fabric.properties
 
 venv/
 /src/logs.json
+/src/logs/hyper*
