@@ -63,23 +63,40 @@ if __name__ == '__main__':
 
 
     # Setup the hyper-parameters and the bayesian optimization model
-    p_bounds = {'number_of_children': (2, alg.v),
-                'number_of_splits': (1, alg.v),
-                'number_of_parents': (2, alg.v),
-                'number_parents_to_keep': (0, alg.v),
+    # p_bounds = {'number_of_children': (2, alg.v),
+    #             'number_of_splits': (1, alg.v),
+    #             'number_of_parents': (2, alg.v),
+    #             'number_parents_to_keep': (0, alg.v),
+    #             'mutation_chance': (0, 1),
+    #             'parents_generation_rate': (0, 1),
+    #             'parent_keep_rate': (0.1, 1),
+    #             'min_mutations': (0, alg.v),
+    #             'max_mutations': (0, alg.v),
+    #             'population_size': (0, 100 * alg.v),
+    #             'loss_exp': (1, alg.v),
+    #             'max_generations': (1, alg.v),
+    #             'bi_max_mutations': (1, alg.v),
+    #             'bi_min_mutations': (1, alg.v),
+    #             'max_inner_splits': (1, alg.v),
+    #             'max_swap_num': (1, alg.v),
+    #             'new_parents_per_generation': (1, alg.v)}
+    p_bounds = {'number_of_children': (2, 3),
+                'number_of_splits': (1, 3),
+                'number_of_parents': (2, 3),
+                'number_parents_to_keep': (1, 3),
                 'mutation_chance': (0, 1),
                 'parents_generation_rate': (0, 1),
                 'parent_keep_rate': (0.1, 1),
-                'min_mutations': (0, alg.v),
-                'max_mutations': (0, alg.v),
-                'population_size': (0, 100 * alg.v),
-                'loss_exp': (1, alg.v),
-                'max_generations': (1, alg.v),
-                'bi_max_mutations': (1, alg.v),
-                'bi_min_mutations': (1, alg.v),
-                'max_inner_splits': (1, alg.v),
-                'max_swap_num': (1, alg.v),
-                'new_parents_per_generation': (1, alg.v)}
+                'min_mutations': (1, 2),
+                'max_mutations': (1, 2),
+                'population_size': (10, 100 * 2),
+                'loss_exp': (1, 2),
+                'max_generations': (1, 100),
+                'bi_max_mutations': (1, 4),
+                'bi_min_mutations': (1, 2),
+                'max_inner_splits': (1, 3),
+                'max_swap_num': (1, 3),
+                'new_parents_per_generation': (1, 3)}
 
     optimizer = BayesianOptimization(
         f=maximization_function,
@@ -92,8 +109,8 @@ if __name__ == '__main__':
     optimizer.subscribe(Events.OPTMIZATION_STEP, logger)
 
     optimizer.maximize(
-        init_points=2,
-        n_iter=3,
+        init_points=25,
+        n_iter=50,
     )
 
     print('The max is: ')
