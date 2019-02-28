@@ -88,7 +88,7 @@ def run_optimization():
                 'max_mutations': (1, 2),
                 'population_size': (10, 200 * 2),
                 'loss_exp': (1, 1),
-                'max_generations': (25, 50),
+                'max_generations': (15, 20),
                 'bi_max_mutations': (1, 4),
                 'bi_min_mutations': (1, 2),
                 'max_inner_splits': (1, 3),
@@ -106,8 +106,8 @@ def run_optimization():
     optimizer.subscribe(Events.OPTMIZATION_END, logger)
 
     optimizer.maximize(
-        init_points=25,
-        n_iter=50,
+        init_points=10,
+        n_iter=15,
     )
 
     print('The max is: ')
@@ -121,6 +121,21 @@ if __name__ == '__main__':
     optimizer_id = 0
 
     targets = (
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
+        run_optimization,
         run_optimization,
         run_optimization,
         run_optimization,
