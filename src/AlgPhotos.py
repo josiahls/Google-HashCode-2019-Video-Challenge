@@ -397,7 +397,7 @@ if __name__ == '__main__':
     alg = GeneticAlgorithm(number_of_children=2,
                            number_of_splits=4,
                            number_of_parents=3,
-                           number_parents_to_keep=None,
+                           number_parents_to_keep=None, # check this one, should be dependent on parent_keep_rate
                            mutation_chance=0.2,
                            parents_generation_rate=0.2,
                            parent_keep_rate=0.2,
@@ -405,9 +405,9 @@ if __name__ == '__main__':
                            max_mutations=1,
                            population_size=400,
                            iterations=2,
-                           loss_exp=2.0,
+                           loss_exp=2.0, # remove
                            max_generations=100,
-                           thresh_fitness=10**100,
+                           thresh_fitness=10**100, # remove
                            bi_max_mutations=0.1,
                            bi_min_mutations=0.5,
                            max_inner_splits=5,
