@@ -3,9 +3,15 @@ import threading
 from bayes_opt import BayesianOptimization, JSONLogger, Events
 from src.JosiahGeneticAlgVideo import GeneticAlgorithm
 
-global results
+results = []
+optimizer_id = 0
+
 
 def run_optimization():
+    global optimizer_id
+    optimizer_id += 1
+    print(f'Optimizer {optimizer_id} Starting')
+
     alg = GeneticAlgorithm(number_of_children=2,
                            number_of_splits=4,
                            number_of_parents=3,
@@ -84,7 +90,7 @@ def run_optimization():
     )
 
     logger = JSONLogger(path="./logs.json")
-    optimizer.subscribe(Events.OPTMIZATION_STEP, logger)
+    optimizer.subscribe(Events.OPTMIZATION_END, logger)
 
     optimizer.maximize(
         init_points=0,
@@ -94,11 +100,13 @@ def run_optimization():
     print('The max is: ')
     print(optimizer.max)
     global results
-    # results.append((name, max_target))
-    # print(colour(name + " is done!"), end="\n\n")
+    results.append((optimizer.max['target'], optimizer.max['params']))
+    print(f'Optimizer {optimizer_id} Ending with target {optimizer.max["target"]}')
 
 
 if __name__ == '__main__':
+    results = []
+    optimizer_id = 0
 
     targets = (
         run_optimization,
