@@ -10,7 +10,7 @@ THRESHFITNESS = 10**100 #MAXFITNESS # for benchmarking only
 
 DOPRINTGEN = 1 # show progress by generation with winning one
 
-FNAME_PREFIX = 'a'
+FNAME_PREFIX = 'input/me_at_the_zoo'
 
 # read input
 V, E, R, C, X = list(map(int, input().strip().split()))
@@ -38,12 +38,12 @@ for i in range(R):
 
 geneset_videos = range(V)
 
-MAXGENERATIONS = 300
+MAXGENERATIONS = 40
 TESTSPERSETUP = 2 # 10
 TESTLOSSEXPONENT = 2.0
 
 BINMUTRATEMIN = 0.1 # on average, when a bin is mutated, remove 20% of the videos (regardless of capacity)
-BINMUTRATEMAX = 0.5 # change this lower for large values
+BINMUTRATEMAX = 0.3 # change this lower for large values
 
 
 #MAXSWAPRATE = 0.1
@@ -55,7 +55,7 @@ MAXSWAPS = MAXSWAPNUM
 
 
 def fitness(state): # be sure that higher is better
-    mssaved = 0
+    totalmssaved = 0
     for req in REQS:
         vid, endpt, nreqs = req
         #print(vid,endpt,nreqs)
@@ -67,10 +67,10 @@ def fitness(state): # be sure that higher is better
                 minreqtime = min(ECACHETIMES[endpt][ccacheid], minreqtime)
                 #minreqsvr = state[ccacheid]
                 
-        mssaved += (dcreqtime - minreqtime) * nreqs
+        totalmssaved += (dcreqtime - minreqtime) * nreqs
         #print("at endpt", endpt, "saved", mssaved, "with", (dcreqtime - minreqtime), "off", nreqs, "reqs using", minreqsvr)
 
-    return mssaved * 1000 / NUMINDREQS
+    return totalmssaved * 1000 / NUMINDREQS
 '''
 print(fitness([set(),set(),set()]))
 print(fitness([set(),{2},{1}]))
@@ -271,14 +271,18 @@ def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, 
             children = select_children(children)
 
             maxfitness = fitness(children[0])
+            fitnesses = [fitness(c) for c in children]
+
             
-            print("Gen "+str(g)+" max fitness "+str(maxfitness)+" with "+str(children[0]))
+            if DOPRINTGEN:
+                print("Gen "+str(g)+" max fitness "+str(maxfitness)+" with "+str(children[0]))
+
+            print("Gen "+str(g)+" max fitness "+fitnesses)
             parents = children
 
             if fitness(children[0]) >= THRESHFITNESS:
                 numconverged += 1
-                if DOPRINTGEN:
-                    print("Finish gen "+str(g)+" max fitness "+str(maxfitness)+" with "+children[0])
+                print("Finish gen "+str(g)+" max fitness "+str(maxfitness)+" with "+children[0])
                 break
 
         else:
@@ -300,7 +304,7 @@ def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, 
     print(strength)
 
     now = datetime.now()
-    fout = open("ans_"+FNAME_PREFIX+now.strftime("%Y%m%d-%H%M%S.%f")+".out", 'w')
+    fout = open(FNAME_PREFIX+"_ans_"+now.strftime("%Y%m%d-%H%M%S.%f")+".out", 'w')
 
     beststate = children[0]
     towrite = str(C)+"\n"
@@ -314,14 +318,15 @@ def ga(NUMSPLITS, NUMCHILDREN, NUMPARENTS, POPSIZE, MINMUTATIONS, MAXMUTATIONS, 
 
 
 if __name__=='__main__':
+    sys.stdin = open(FNAME_PREFIX+".in")
 
 
     # hyperparameters
     NUMSPLITS = 2
-    NUMCHILDREN = 4
-    NUMPARENTS = 2
+    NUMCHILDREN = 2 # may need at least 2 to avoid crash
+    NUMPARENTS = 3
 
-    POPSIZE = 15
+    POPSIZE = 10
     MINMUTATIONS = 1
     MAXMUTATIONS = 1
     NEWPARENTSPERGENRATE = 0.2
