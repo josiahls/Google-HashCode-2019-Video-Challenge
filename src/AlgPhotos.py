@@ -6,7 +6,7 @@ import sys
 
 
 
-FNAME_PREFIX = '../photo_input/a_example.txt'
+FNAME_PREFIX = '../photo_input/d_pet_pictures.txt'
 
 
 class GeneticAlgorithm:
@@ -27,7 +27,7 @@ class GeneticAlgorithm:
                  max_generations,
                  loss_exp=1,
                  print_generation=1,
-                 out_file_name_prefix='photoinput/a.in'):
+                 out_file_name_prefix='../photo_input/a.in'):
         """
 
         :param number_of_children:
@@ -458,7 +458,7 @@ class GeneticAlgorithm:
         return children[:int(self.population_size * 0.8)] + children[
                                                int(self.population_size * 0.5): int(self.population_size * 0.5) + self.population_size - int(self.population_size * 0.8)]
 
-    def search(self, time_limit=None):
+    def search(self, time_limit=None, outfile_write=True):
         totaltime = 0
         numconverged = 0
 
@@ -537,15 +537,15 @@ class GeneticAlgorithm:
 
         print(strength)
 
-        now = datetime.now()
-        fout = open(now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
-
-        beststate = children[0]
-        towrite = str(len(children[0])) + "\n"
-        for i in range(len(children[0])):
-            towrite += " ".join(str(e) for e in children[0][i])
-        fout.write(towrite)
-        fout.close()
+        if outfile_write:
+            now = datetime.now()
+            fout = open(now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
+            beststate = children[0]
+            towrite = str(len(children[0])) + "\n"
+            for i in range(len(children[0])):
+                towrite += " ".join(str(e) for e in children[0][i]) + '\n'
+            fout.write(towrite)
+            fout.close()
 
         return 1 / strength  # change this to return the fitness after 5 seconds
 

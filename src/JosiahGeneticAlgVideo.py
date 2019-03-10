@@ -381,14 +381,14 @@ class GeneticAlgorithm:
         print(strength)
 
         now = datetime.now()
-        # fout = open("logs/ans_" + self.out_file_name_prefix + now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
-        #
-        # beststate = children[0]
-        # towrite = str(self.c) + "\n"
-        # for i in range(self.c):
-        #     towrite += str(i) + " " + " ".join(str(e) for e in list(beststate[i]))
-        # fout.write(towrite)
-        # fout.close()
+        fout = open("logs/ans_" + self.out_file_name_prefix + now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
+
+        beststate = children[0]
+        towrite = str(self.c) + "\n"
+        for i in range(self.c):
+            towrite += str(i) + " " + " ".join(str(e) for e in list(beststate[i]))
+        fout.write(towrite)
+        fout.close()
 
         return 1 / strength  # change this to return the fitness after 5 seconds
 

@@ -1,6 +1,9 @@
 from datetime import datetime
 import sys
 import threading
+from functools import partial
+from pandas.io.json import json
+import pandas as pd
 
 from bayes_opt import BayesianOptimization, JSONLogger, Events
 from AlgPhotos import GeneticAlgorithm
@@ -10,7 +13,7 @@ optimizer_id = 0
 optimizer_id_queue = 0
 
 
-def run_optimization():
+def run_optimization(relative_dataset_path: str = '../photo_input/a_example.txt', p_bounds: dict = {}):
     global optimizer_id, optimizer_id_queue
     optimizer_id += 1
     local_id = optimizer_id
@@ -19,9 +22,8 @@ def run_optimization():
     while local_id != 1 and local_id != optimizer_id_queue + 1:
         pass
 
-    # Let the thread sleep
-    sys.stdin = open('../photo_input/a_example.txt')  # Needs
-
+    # Read the example file
+    sys.stdin = open(relative_dataset_path)
     alg = GeneticAlgorithm(number_of_children=2,
                            number_of_splits=4,
                            number_of_parents=3,
@@ -30,17 +32,15 @@ def run_optimization():
                            parent_keep_rate=0.2,
                            min_mutations=1,
                            max_mutations=1,
-                           population_size=400,
+                           population_size=20,
                            iterations=2,
-                           loss_exp=1.0,
-                           max_generations=100,
+                           max_generations=10,
                            bin_max_mutations=0.1,
                            bin_min_mutations=0.5,
                            max_inner_splits=5,
-                           max_swap_num=5,
-                           out_file_name_prefix='me_' + str(local_id))
+                           max_swap_num=5)
+    # Close the file, and allow the next thread to read the file
     sys.stdin.close()
-
     optimizer_id_queue += 1
 
     # We setup the optimization function
@@ -65,26 +65,11 @@ def run_optimization():
                          max_swap_num=max_swap_num)
 
         try:
-            fitness = alg.search(time_limit=5)
+            fitness = alg.search(time_limit=5, outfile_write=False)
         except ValueError:
-            return 1
+            return 0
         print(f'Fitness strength is: {fitness}')
         return fitness
-
-    p_bounds = {'number_of_children': (2, 3),
-                'number_of_splits': (1, 3),
-                'number_of_parents': (2, 3),
-                'mutation_chance': (0, 1),
-                'parents_generation_rate': (0, 1),
-                'parent_keep_rate': (0.1, 1),
-                'min_mutations': (1, 2),
-                'max_mutations': (1, 2),
-                'population_size': (10, 100 * 2),
-                'max_generations': (1, 100),
-                'bin_max_mutations': (1, 4),
-                'bin_min_mutations': (1, 2),
-                'max_inner_splits': (1, 3),
-                'max_swap_num': (1, 3)}
 
     optimizer = BayesianOptimization(
         f=maximization_function,
@@ -97,50 +82,51 @@ def run_optimization():
     optimizer.subscribe(Events.OPTMIZATION_END, logger)
 
     optimizer.maximize(
-        init_points=25,
-        n_iter=50,
+        init_points=1,
+        n_iter=1,
     )
 
-    print('The max is: ')
-    print(optimizer.max)
     global results
-    results.append((optimizer.max['target'], optimizer.max['params']))
-    print(f'Optimizer {optimizer_id} Ending with target {optimizer.max["target"]}')
+    sorted_results = sorted(optimizer.res, key=lambda k: k['target'])
+    for parameter in list(reversed(sorted_results))[-2:]:
+        results.append(parameter)
 
 
 if __name__ == '__main__':
     results = []
     optimizer_id = 0
 
+    p_bounds = {'number_of_children': (2, 3),
+                'number_of_splits': (1, 3),
+                'number_of_parents': (2, 3),
+                'mutation_chance': (0, 1),
+                'parents_generation_rate': (0, 1),
+                'parent_keep_rate': (0.1, 1),
+                'min_mutations': (1, 2),
+                'max_mutations': (1, 2),
+                'population_size': (10, 100),
+                'max_generations': (1, 10),
+                'bin_max_mutations': (1, 4),
+                'bin_min_mutations': (1, 2),
+                'max_inner_splits': (1, 3),
+                'max_swap_num': (1, 3)}
+
     targets = (
         run_optimization,
         run_optimization,
-        run_optimization,
-        run_optimization,
-        run_optimization,
-        run_optimization,
-        run_optimization,
-        run_optimization,
-        # run_optimization
+        run_optimization
     )
     optimizer_threads = []
     for target in targets:
-        optimizer_threads.append(threading.Thread(target=target))
+        optimizer_threads.append(threading.Thread(target=partial(target, p_bounds=p_bounds)))
         optimizer_threads[-1].daemon = True
         optimizer_threads[-1].start()
 
-    results = []
     for optimizer_thread in optimizer_threads:
         optimizer_thread.join()
 
     for result in results:
-        print(result[0], "found a maximum value of: {}".format(result[1]))
+        print("found a maximum value of: {}".format(result['target']))
 
     now = datetime.now()
-    fout = open("logs/hyper_params" + now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
-
-    towrite = "\n"
-    for result in results:
-        towrite += str(result) + '\n'
-    fout.write(towrite)
-    fout.close()
+    json.to_json("logs/hyper_params" + now.strftime("%Y%m%d-%H%M%S.%f"), pd.DataFrame(results))
