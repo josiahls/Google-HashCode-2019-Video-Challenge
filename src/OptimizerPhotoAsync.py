@@ -13,7 +13,7 @@ optimizer_id = 0
 optimizer_id_queue = 0
 
 
-def run_optimization(relative_dataset_path: str = '../photo_input/a_example.txt', p_bounds: dict = {}):
+def run_optimization(relative_dataset_path: str = '../photo_input/c_memorable_moments.txt', p_bounds: dict = {}):
     global optimizer_id, optimizer_id_queue
     optimizer_id += 1
     local_id = optimizer_id
@@ -82,12 +82,16 @@ def run_optimization(relative_dataset_path: str = '../photo_input/a_example.txt'
     optimizer.subscribe(Events.OPTMIZATION_END, logger)
 
     optimizer.maximize(
-        init_points=2,
-        n_iter=5,
+        init_points=10,
+        n_iter=20,
     )
 
     global results
     sorted_results = sorted(optimizer.res, key=lambda k: k['target'])
+
+    print(str(sorted_results))
+    print(str(list(reversed(sorted_results))))
+    print(str(list(reversed(sorted_results))[-2:]))
     for parameter in list(reversed(sorted_results))[-2:]:
         results.append(parameter)
 
@@ -97,21 +101,24 @@ if __name__ == '__main__':
     optimizer_id = 0
 
     p_bounds = {'number_of_children': (2, 3),
-                'number_of_splits': (2, 3),
-                'number_of_parents': (2, 3),
+                'number_of_splits': (2, 5),
+                'number_of_parents': (2, 4),
                 'mutation_chance': (0.1, 1),
                 'parents_generation_rate': (0.1, 1),
                 'parent_keep_rate': (0.1, 1),
-                'min_mutations': (2, 3),
-                'max_mutations': (4, 5),
-                'population_size': (10, 100*2),
-                'max_generations': (1, 10),
-                'bin_max_mutations': (4, 5),
-                'bin_min_mutations': (2, 3),
-                'max_inner_splits': (2, 3),
-                'max_swap_num': (2, 3)}
+                'min_mutations': (2, 4),
+                'max_mutations': (5, 7),
+                'population_size': (175, 200),
+                'max_generations': (20, 30),
+                'bin_max_mutations': (5, 7),
+                'bin_min_mutations': (2, 4),
+                'max_inner_splits': (3, 6),
+                'max_swap_num': (2, 6)}
 
     targets = (
+        run_optimization,
+        run_optimization,
+        run_optimization,
         run_optimization,
         run_optimization,
         run_optimization
