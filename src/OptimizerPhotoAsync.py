@@ -82,8 +82,8 @@ def run_optimization(relative_dataset_path: str = '../photo_input/a_example.txt'
     optimizer.subscribe(Events.OPTMIZATION_END, logger)
 
     optimizer.maximize(
-        init_points=1,
-        n_iter=1,
+        init_points=2,
+        n_iter=5,
     )
 
     global results
@@ -99,17 +99,17 @@ if __name__ == '__main__':
     p_bounds = {'number_of_children': (2, 3),
                 'number_of_splits': (2, 3),
                 'number_of_parents': (2, 3),
-                'mutation_chance': (0, 1),
-                'parents_generation_rate': (0, 1),
+                'mutation_chance': (0.1, 1),
+                'parents_generation_rate': (0.1, 1),
                 'parent_keep_rate': (0.1, 1),
-                'min_mutations': (1, 2),
-                'max_mutations': (3, 4),
-                'population_size': (10, 100),
+                'min_mutations': (2, 3),
+                'max_mutations': (4, 5),
+                'population_size': (10, 100*2),
                 'max_generations': (1, 10),
-                'bin_max_mutations': (3, 4),
-                'bin_min_mutations': (1, 2),
-                'max_inner_splits': (1, 3),
-                'max_swap_num': (1, 3)}
+                'bin_max_mutations': (4, 5),
+                'bin_min_mutations': (2, 3),
+                'max_inner_splits': (2, 3),
+                'max_swap_num': (2, 3)}
 
     targets = (
         run_optimization,

@@ -6,7 +6,7 @@ import sys
 
 from src.JSONParamLoader import JSONParamLoader
 
-FNAME_PREFIX = '../photo_input/d_pet_pictures.txt'
+FNAME_PREFIX = '../photo_input/a_example.txt'
 
 
 class GeneticAlgorithm:
