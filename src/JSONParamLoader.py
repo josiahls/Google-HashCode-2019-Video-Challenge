@@ -14,7 +14,7 @@ class JSONParamLoader:
 
     def getBestParam(self):
         df = self.getParams()
-        return df.loc[df['target'].argmax()]['params']
+        return df.loc[df['target'].values.argmax()]['params']
 
 if __name__ == '__main__':
     json_data = JSONParamLoader().getBestParam()
