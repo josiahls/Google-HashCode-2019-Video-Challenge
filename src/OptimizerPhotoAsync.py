@@ -97,16 +97,16 @@ if __name__ == '__main__':
     optimizer_id = 0
 
     p_bounds = {'number_of_children': (2, 3),
-                'number_of_splits': (1, 3),
+                'number_of_splits': (2, 3),
                 'number_of_parents': (2, 3),
                 'mutation_chance': (0, 1),
                 'parents_generation_rate': (0, 1),
                 'parent_keep_rate': (0.1, 1),
                 'min_mutations': (1, 2),
-                'max_mutations': (1, 2),
+                'max_mutations': (3, 4),
                 'population_size': (10, 100),
                 'max_generations': (1, 10),
-                'bin_max_mutations': (1, 4),
+                'bin_max_mutations': (3, 4),
                 'bin_min_mutations': (1, 2),
                 'max_inner_splits': (1, 3),
                 'max_swap_num': (1, 3)}
