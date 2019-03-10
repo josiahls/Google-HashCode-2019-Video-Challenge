@@ -2,6 +2,8 @@ import string
 import random
 import time
 
+from src.JSONParamLoader import JSONParamLoader
+
 
 class GeneticAlgorithm:
     def __init__(self, number_of_children, number_of_splits, number_of_parents, number_parents_to_keep,
@@ -177,4 +179,5 @@ if __name__ == '__main__':
                            thresh_fitness=len(X),
                            size=len(X),
                            target=X)
+
     print(f'Fitness strength is: {alg.search()}')

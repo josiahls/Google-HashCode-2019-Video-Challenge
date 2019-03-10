@@ -4,7 +4,7 @@ import math
 from datetime import datetime
 import sys
 
-
+from src.JSONParamLoader import JSONParamLoader
 
 FNAME_PREFIX = '../photo_input/d_pet_pictures.txt'
 
@@ -568,4 +568,8 @@ if __name__ == '__main__':
                            bin_min_mutations=0.5,
                            max_inner_splits=5,
                            max_swap_num=5)
-    print(f'Fitness strength is: {alg.search()}')
+
+    json_data = JSONParamLoader().getBestParam()
+    alg.reset_params(**json_data)
+
+    print(f'Fitness strength is: {alg.search(time_limit=20)}')
