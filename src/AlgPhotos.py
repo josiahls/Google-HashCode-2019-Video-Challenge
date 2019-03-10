@@ -25,7 +25,7 @@ class GeneticAlgorithm:
                  population_size,
                  iterations,
                  max_generations,
-                 loss_exp=1,
+                 loss_exp=2,
                  print_generation=1,
                  out_file_name_prefix='../photo_input/a.in'):
         """
@@ -560,7 +560,7 @@ if __name__ == '__main__':
                            parents_generation_rate=0.2,
                            parent_keep_rate=0.2,
                            min_mutations=1,
-                           max_mutations=1,
+                           max_mutations=3,
                            population_size=20,
                            iterations=2,
                            max_generations=10,

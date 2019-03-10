@@ -13,7 +13,7 @@ optimizer_id = 0
 optimizer_id_queue = 0
 
 
-def run_optimization(relative_dataset_path: str = '../photo_input/c_memorable_moments.txt', p_bounds: dict = {}):
+def run_optimization(relative_dataset_path: str = '../photo_input/a_example.txt', p_bounds: dict = {}):
     global optimizer_id, optimizer_id_queue
     optimizer_id += 1
     local_id = optimizer_id
@@ -103,9 +103,9 @@ if __name__ == '__main__':
     p_bounds = {'number_of_children': (2, 3),
                 'number_of_splits': (2, 5),
                 'number_of_parents': (2, 4),
-                'mutation_chance': (0.1, 1),
-                'parents_generation_rate': (0.1, 1),
-                'parent_keep_rate': (0.1, 1),
+                'mutation_chance': (0.1, .9),
+                'parents_generation_rate': (0.1, .9),
+                'parent_keep_rate': (0.1, .9),
                 'min_mutations': (2, 4),
                 'max_mutations': (5, 7),
                 'population_size': (175, 200),
