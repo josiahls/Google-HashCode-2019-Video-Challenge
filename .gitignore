@@ -70,4 +70,9 @@ fabric.properties
 
 venv/
 /src/logs.json
-/src/logs/hyper*
+#/src/logs/hyper*
+src.zip
+src/20190310-110257.654834_a_example.out
+src/20190310-110330.801481_c_memorable_moments.out
+src/20190310-111451.488548_b_lovely_landscapes.out
+src/__pycache__/
