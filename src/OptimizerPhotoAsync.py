@@ -13,7 +13,7 @@ optimizer_id = 0
 optimizer_id_queue = 0
 
 
-def run_optimization(relative_dataset_path: str = '../photo_input/a_example.txt', p_bounds: dict = {}):
+def run_optimization(relative_dataset_path: str = '../photo_input/b_lovely_landscapes.txt', p_bounds: dict = {}):
     global optimizer_id, optimizer_id_queue
     optimizer_id += 1
     local_id = optimizer_id

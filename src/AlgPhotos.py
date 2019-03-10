@@ -6,7 +6,11 @@ import sys
 
 from src.JSONParamLoader import JSONParamLoader
 
-FNAME_PREFIX = '../photo_input/a_example.txt'
+# FNAME_PREFIX = '../photo_input/a_example.txt'
+# FNAME_PREFIX = '../photo_input/b_lovely_landscapes.txt'
+# FNAME_PREFIX = '../photo_input/c_memorable_moments.txt'
+# FNAME_PREFIX = '../photo_input/d_pet_pictures.txt'
+FNAME_PREFIX = '../photo_input/e_shiny_selfies.txt'
 
 
 class GeneticAlgorithm:
@@ -172,7 +176,7 @@ class GeneticAlgorithm:
         self.number_of_parents = int(number_of_parents)
 
         self.mutation_chance = mutation_chance
-        self.population_size = int(population_size)
+        # self.population_size = int(population_size)
 
         self.parent_keep_rate = parent_keep_rate
         self.parents_generation_rate = parents_generation_rate
@@ -539,7 +543,7 @@ class GeneticAlgorithm:
 
         if outfile_write:
             now = datetime.now()
-            fout = open(now.strftime("%Y%m%d-%H%M%S.%f") + ".out", 'w')
+            fout = open(now.strftime("%Y%m%d-%H%M%S.%f") + '_' + FNAME_PREFIX.split('/')[-1][:-4] + ".out", 'w')
             beststate = children[0]
             towrite = str(len(children[0])) + "\n"
             for i in range(len(children[0])):
@@ -569,7 +573,7 @@ if __name__ == '__main__':
                            max_inner_splits=5,
                            max_swap_num=5)
 
-    json_data = JSONParamLoader().getBestParam()
-    alg.reset_params(**json_data)
+    # json_data = JSONParamLoader().getBestParam()
+    # alg.reset_params(**json_data)
 
     print(f'Fitness strength is: {alg.search(time_limit=20)}')
